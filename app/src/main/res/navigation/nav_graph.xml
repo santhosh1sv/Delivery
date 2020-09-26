@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    app:startDestination="@id/deliveriesFragment">
+
+    <fragment
+        android:id="@+id/deliveriesFragment"
+        android:name="com.test.delivery.fragments.DeliveriesFragment"
+        android:label="DeliveriesFragment" >
+        <action
+            android:id="@+id/action_deliveriesFragment_to_deliveryMapFragment"
+            app:destination="@id/deliveryMapFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/deliveryMapFragment"
+        android:name="com.test.delivery.fragments.DeliveryMapFragment"
+        android:label="DeliveryMapFragment">
+
+        <argument
+            android:name="deliveryItem"
+            app:argType="com.test.delivery.models.DeliveryModelItem"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+</navigation>
