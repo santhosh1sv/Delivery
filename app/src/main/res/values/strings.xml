@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Delivery</string>
+    <string name="things_to_deliver">Things to Deliver</string>
+    <string name="delivery_details">Delivery Details</string>
 </resources>
