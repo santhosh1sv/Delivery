@@ -26,8 +26,8 @@ fun Activity.isConnectingToInternet(): Boolean {
 }
 
 fun AppCompatActivity.showActionBar(toolbar: Toolbar, title: String) {
-    toolbar.setTitle(title)
+    toolbar.title = title
     setSupportActionBar(toolbar)
-    getSupportActionBar()?.setDisplayHomeAsUpEnabled(true)
-    getSupportActionBar()?.setDisplayShowHomeEnabled(true)
+    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    supportActionBar?.setDisplayShowHomeEnabled(true)
 }

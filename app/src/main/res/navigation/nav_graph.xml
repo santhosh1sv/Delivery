@@ -14,5 +14,12 @@
     <fragment
         android:id="@+id/deliveryMapFragment"
         android:name="com.test.delivery.fragments.DeliveryMapFragment"
-        android:label="DeliveryMapFragment" />
+        android:label="DeliveryMapFragment">
+
+        <argument
+            android:name="deliveryItem"
+            app:argType="com.test.delivery.models.DeliveryModelItem"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 </navigation>
