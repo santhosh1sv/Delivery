@@ -1,20 +1,18 @@
 package com.test.delivery.room.daos
 
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.test.delivery.room.entities.DeliveryEntity
 
+@Dao
 interface DeliveryDao {
 
-    @Insert
-    fun insertAll(vararg delivery: DeliveryEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(delivery: List<DeliveryEntity>)
 
-    @Delete
-    fun delete(delivery: DeliveryEntity)
+    @Query("DELETE FROM delivery")
+    fun deleteAll()
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(delivery: DeliveryEntity)
 
     @Query("SELECT * FROM delivery")

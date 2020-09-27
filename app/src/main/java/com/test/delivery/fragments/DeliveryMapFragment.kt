@@ -43,9 +43,6 @@ class DeliveryMapFragment : Fragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        args = arguments?.let { DeliveryMapFragmentArgs.fromBundle(it) }
-        val item = args?.deliveryItem
-        val description = "${item?.description} at"
         val fontLight = Typeface.createFromAsset(
             act.assets,
             "fonts/Barlow-Light.ttf"
@@ -56,24 +53,41 @@ class DeliveryMapFragment : Fragment(), OnMapReadyCallback {
         )
         tvDescription.typeface = fontLight
         tvAddress.typeface = fontMed
-        tvDescription.text = description
-        tvAddress.text = item?.location?.address
-        Picasso.with(act).load(item?.imageUrl).fit().centerCrop()
-            .placeholder(R.drawable.ic_launcher_foreground)
-            .into(ivPhoto)
+        args = arguments?.let { DeliveryMapFragmentArgs.fromBundle(it) }
+        val item = args?.deliveryItem
+        if (item != null) {
+            val description = "${item.description} at"
+            tvDescription.text = description
+            tvAddress.text = item.location.address
+            Picasso.with(act).load(item.imageUrl).fit().centerCrop()
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(ivPhoto)
+        } else {
+            val itm = args?.deliverEntity
+            val description = "${itm?.description} at"
+            tvDescription.text = description
+            tvAddress.text = itm?.address
+            Picasso.with(act).load(itm?.imageUrl).fit().centerCrop()
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(ivPhoto)
+        }
     }
 
     override fun onMapReady(map: GoogleMap?) {
-        val loc = args?.deliveryItem?.location
-        val latLng = loc?.let { LatLng(loc.lat, loc.lng) }
-        map?.addMarker(latLng?.let {
-            MarkerOptions().position(it).icon(
-                BitmapDescriptorFactory.defaultMarker(
-                    BitmapDescriptorFactory.HUE_GREEN
+        try {
+            val loc = args?.deliveryItem?.location
+            val latLng = loc?.let { LatLng(loc.lat, loc.lng) }
+            map?.addMarker(latLng?.let {
+                MarkerOptions().position(it).icon(
+                    BitmapDescriptorFactory.defaultMarker(
+                        BitmapDescriptorFactory.HUE_GREEN
+                    )
                 )
-            )
-        })
-        val zoomLevel = 16.0f
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel))
+            })
+            val zoomLevel = 16.0f
+            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel))
+        }catch(e:Exception){
+            e.printStackTrace()
+        }
     }
 }

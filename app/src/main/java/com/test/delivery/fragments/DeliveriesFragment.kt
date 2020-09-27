@@ -14,6 +14,7 @@ import com.test.delivery.R
 import com.test.delivery.adapters.DeliveryAdapter
 import com.test.delivery.listeners.DeliveryItemClickListener
 import com.test.delivery.models.DeliveryModelItem
+import com.test.delivery.room.entities.DeliveryEntity
 import com.test.delivery.utilities.addAll
 import com.test.delivery.utilities.isConnectingToInternet
 import com.test.delivery.utilities.showActionBar
@@ -23,7 +24,7 @@ import kotlinx.android.synthetic.main.fragment_deliveries.*
 
 class DeliveriesFragment : Fragment(), DeliveryItemClickListener {
 
-    private val list: ArrayList<Any> = ArrayList()
+    private lateinit var list: ArrayList<Any>
     private var deliveryListAdapter: DeliveryAdapter? = null
     private var viewModel: DeliveriesFragmentViewModel? = null
 
@@ -43,19 +44,24 @@ class DeliveriesFragment : Fragment(), DeliveryItemClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val act = activity as AppCompatActivity
-        viewModel = ViewModelProviders.of(this).get(DeliveriesFragmentViewModel::class.java)
+        viewModel = ViewModelProviders.of(act).get(DeliveriesFragmentViewModel::class.java)
         act.showActionBar(toolbar, getString(R.string.things_to_deliver))
         rvDeliveries.apply {
             layoutManager = LinearLayoutManager(context)
-            deliveryListAdapter = DeliveryAdapter(list, this@DeliveriesFragment)
+            if (act.isConnectingToInternet()) {
+                prBar.visibility = View.VISIBLE
+                list=ArrayList()
+                deliveryListAdapter = DeliveryAdapter(false, list, this@DeliveriesFragment)
+                loadItems(act, false)
+            } else {
+                prBar.visibility = View.VISIBLE
+                list=ArrayList()
+                deliveryListAdapter = DeliveryAdapter(true, list, this@DeliveriesFragment)
+                loadItems(act, true)
+            }
             adapter = deliveryListAdapter
         }
-        if (act.isConnectingToInternet()) {
-            prBar.visibility = View.VISIBLE
-            loadItems(act, false)
-        } else {
-            loadItems(act, true)
-        }
+
 
 
     }
@@ -67,8 +73,17 @@ class DeliveriesFragment : Fragment(), DeliveryItemClickListener {
                     viewModel?.getDeliveries()?.observe(act, Observer {
                         when {
                             it != null -> {
-                                prBar.visibility = View.GONE
                                 deliveryListAdapter?.addAll(list, it)
+                                val list= ArrayList<DeliveryEntity>()
+                                it.forEach {item->
+                                    val deliveryEntity=DeliveryEntity(item.description,item.location.address,item.imageUrl)
+                                    list.add(deliveryEntity)
+                                }
+                                viewModel?.insertAll(list)?.observe(act,Observer{inserted->
+                                    if(inserted){
+                                        prBar.visibility = View.GONE
+                                    }
+                                })
                             }
                             else -> {
                                 prBar.visibility = View.GONE
@@ -78,7 +93,18 @@ class DeliveriesFragment : Fragment(), DeliveryItemClickListener {
                     })
                 }
                 true -> {
-
+                    viewModel?.getLocalDeliveries()?.observe(act, Observer {
+                        when {
+                            it != null ->{
+                                prBar.visibility = View.GONE
+                                deliveryListAdapter?.addAll(list, it)
+                            }
+                            else->{
+                                prBar.visibility = View.GONE
+                                act.showToast(getString(R.string.no_cache_data))
+                            }
+                        }
+                    })
                 }
             }
         } catch (e: Exception) {
@@ -88,10 +114,13 @@ class DeliveriesFragment : Fragment(), DeliveryItemClickListener {
 
     }
 
-    override fun customClick(view: View, position: Int) {
-        val item = list[position] as DeliveryModelItem
-        val action =
-            DeliveriesFragmentDirections.actionDeliveriesFragmentToDeliveryMapFragment(item)
+    override fun customClick(fromCache: Boolean, view: View, position: Int) {
+
+      val action=  if (!fromCache)
+            DeliveriesFragmentDirections.actionDeliveriesFragmentToDeliveryMapFragment(list[position] as DeliveryModelItem,null)
+        else
+            DeliveriesFragmentDirections.actionDeliveriesFragmentToDeliveryMapFragment(null,list[position] as DeliveryEntity)
+
         Navigation.findNavController(view).navigate(action)
     }
 

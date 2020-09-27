@@ -17,28 +17,28 @@ object ApisRepository {
     }
 
     fun getDeliveries(): LiveData<DeliveryModel>? {
-        if (deliveries == null) {
-            deliveries = MutableLiveData()
-            apiRequest?.getDeliveries()?.enqueue(object : Callback<DeliveryModel?> {
-                override fun onResponse(
-                    call: Call<DeliveryModel?>,
-                    response: Response<DeliveryModel?>
-                ) {
-                    try {
-                        val deliveryModel = response.body()
-                        deliveries?.value = deliveryModel
-                    } catch (e: Exception) {
-                        deliveries?.value = null
-                    }
-
-                }
-
-                override fun onFailure(call: Call<DeliveryModel?>, t: Throwable) {
+        //if (deliveries == null) {
+        deliveries = MutableLiveData()
+        apiRequest?.getDeliveries()?.enqueue(object : Callback<DeliveryModel?> {
+            override fun onResponse(
+                call: Call<DeliveryModel?>,
+                response: Response<DeliveryModel?>
+            ) {
+                try {
+                    val deliveryModel = response.body()
+                    deliveries?.value = deliveryModel
+                } catch (e: Exception) {
                     deliveries?.value = null
                 }
 
-            })
-        }
+            }
+
+            override fun onFailure(call: Call<DeliveryModel?>, t: Throwable) {
+                deliveries?.value = null
+            }
+
+        })
+        //}
 
         return deliveries
     }
